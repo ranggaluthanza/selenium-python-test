@@ -1,10 +1,8 @@
-# Silvi Merchant Web Automation
+# Automation on Sauce Demo Website
 
-## Quick Start
+## Overview
 
-Silvi Merchant Web Automation is a regression unittest that
-Automates Testing using Selenium. Selenium is a well known Browser
-Automation tool to run various tasks in the Browser.
+This repo is for regression unit test on Sauce Demo Website. 
 
 To run this project, you will require :
 
@@ -17,8 +15,7 @@ Getting started, you would need to install some Python libraries.
 
 `pip install -r requirements.txt`
 
-After installation, you would need some drivers to be added. Please
-check the table below for references.
+After installation, you would need some drivers to be added.
 
 | Driver  | URL |
 | ------------- | ------------- |
