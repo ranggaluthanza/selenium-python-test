@@ -1,5 +1,6 @@
 import os
 import random
+import time
 import platform
 import unittest
 import warnings
@@ -14,7 +15,6 @@ from selenium.common.exceptions import TimeoutException
 
 from faker import Faker
 
-
 class LoginTests(unittest.TestCase):
     def setUp(self) -> None:
         load_dotenv()
@@ -26,48 +26,55 @@ class LoginTests(unittest.TestCase):
 
         fake = Faker('id-ID')
 
-        self.login_url = "https://silvi-merchant-develop.netlify.app/"
-        self.valid_email = 'samsantechrestoran@mailnesia.com'
-        self.valid_password = '123456'
-        self.valid_merchant_name = 'Samsan Tech Restoran!!'
-
-        self.invalid_email = fake.email()
-        self.invalid_password = random.randint(99999, 999999)
+        self.login_url = "https://www.saucedemo.com/"
+        self.valid_username = 'standard_user'
+        self.valid_password = 'secret_sauce'
+        self.random_username = fake.name()
+        self.random_password = fake.name()
 
         # xPaths
-        self.login_button_xpath = '//*[@id="root"]/div[2]/div/div[2]/form/button'
+        self.username_field_xpath = '//*[@id="user-name"]'
+        self.password_field_xpath = '//*[@id="password"]'
+        self.login_button_xpath = '//*[@id="login-button"]'
+        self.main_logo_xpath = '//*[@id="header_container"]/div[1]/div[2]/div'
+        self.login_logo_xpath = '//*[@id="root"]/div/div[1]'
 
         # Etc.
         self.context = {}
 
+        # Login Driver
+        self.driver.maximize_window()
+        self.driver.get(self.login_url)
+
     def test_valid_login(self):
         with self.driver as driver:
             driver.maximize_window()
-
             driver.get(self.login_url)
 
             try:
                 _ = WebDriverWait(driver, 3).until(
-                    EC.presence_of_element_located((By.ID, "email"))
+                    EC.presence_of_element_located((By.XPATH, self.login_logo_xpath))
                 )
             except TimeoutException:
-                logger.error("Login Valid Test Case resulted Error")
+                logger.error("Url page error")
                 return
 
-            driver.find_element(By.ID, "email").send_keys(self.valid_email)
-            driver.find_element(By.ID, "pin").send_keys(self.valid_password)
+            driver.find_element(By.XPATH, self.username_field_xpath).send_keys(self.valid_username)
+            driver.find_element(By.XPATH, self.password_field_xpath).send_keys(self.valid_password)
 
             driver.find_element(By.XPATH, self.login_button_xpath).click()
 
             try:
                 _ = WebDriverWait(driver, 10).until(
-                    EC.text_to_be_present_in_element((By.TAG_NAME, "h4"), self.valid_merchant_name)
+                    EC.presence_of_element_located((By.XPATH, self.main_logo_xpath))
                 )
+                login_success = True
             except TimeoutException:
-                logger.error("Login Valid Test Case resulted Error")
+                logger.error("Home page after login error")
                 return
 
-            assert self.valid_merchant_name in driver.page_source
+            time.sleep(10)
+            assert login_success is True
             logger.success("Login Valid Test Case has been Tested")
 
     def test_invalid_login(self):
@@ -78,27 +85,27 @@ class LoginTests(unittest.TestCase):
 
             try:
                 _ = WebDriverWait(driver, 3).until(
-                    EC.presence_of_element_located((By.ID, "email"))
+                    EC.presence_of_element_located((By.XPATH, self.login_logo_xpath))
                 )
             except TimeoutException:
                 logger.error("Login Invalid Test Case resulted Error")
                 return
 
-            driver.find_element(By.ID, "email").send_keys(self.invalid_email)
-            driver.find_element(By.ID, "pin").send_keys(self.invalid_password)
+            driver.find_element(By.XPATH, self.username_field_xpath).send_keys(self.random_username)
+            driver.find_element(By.XPATH, self.password_field_xpath).send_keys(self.random_password)
 
             driver.find_element(By.XPATH, self.login_button_xpath).click()
 
             try:
                 _ = WebDriverWait(driver, 10).until(
                     EC.text_to_be_present_in_element(
-                        (By.CLASS_NAME, "MuiAlert-message"), "Bad Credential")
+                        (By.TAG_NAME, "h3"), "Epic sadface: Username and password do not match any user in this service")
                 )
             except TimeoutException:
                 logger.error("Login Invalid Test Case resulted Error")
                 return
 
-            assert "Bad Credential" in driver.page_source
+            assert "Epic sadface: Username and password do not match any user in this service" in driver.page_source
             logger.success("Login Invalid Test Case has been Tested")
 
     def tearDown(self) -> None:
